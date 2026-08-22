@@ -1,9 +1,12 @@
+from __future__ import annotations
+
+import argparse
 from pathlib import Path
 
 import pandas as pd
 
-INPUT = Path("data/raw/nyc_311_2025.csv")
-OUTPUT = Path("data/processed/nyc_311_2025_clean.csv")
+DEFAULT_INPUT = Path("data/raw/nyc_311_2025.csv")
+DEFAULT_OUTPUT = Path("data/processed/nyc_311_2025_clean.csv")
 
 DATE_COLUMNS = [
     "created_date",
@@ -25,8 +28,8 @@ TEXT_COLUMNS = [
 ]
 
 
-def main() -> None:
-    df = pd.read_csv(INPUT, low_memory=False)
+def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
 
     for column in DATE_COLUMNS:
         if column in df.columns:
@@ -66,12 +69,35 @@ def main() -> None:
         if column in df.columns:
             df[column] = pd.to_numeric(df[column], errors="coerce")
 
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(OUTPUT, index=False)
+    return df
 
-    print(f"Raw rows: {len(pd.read_csv(INPUT, usecols=['unique_key'])):,}")
-    print(f"Clean rows: {len(df):,}")
-    print(f"Saved cleaned dataset to {OUTPUT}")
+
+def prepare(input_path: Path, output_path: Path) -> pd.DataFrame:
+    if not input_path.exists():
+        raise FileNotFoundError(f"Raw dataset not found: {input_path}")
+
+    raw = pd.read_csv(input_path, low_memory=False)
+    clean = clean_dataframe(raw)
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    clean.to_csv(output_path, index=False)
+
+    print(f"Raw rows: {len(raw):,}")
+    print(f"Clean rows: {len(clean):,}")
+    print(f"Saved cleaned dataset to {output_path}")
+    return clean
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Clean and feature-engineer NYC 311 data.")
+    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    prepare(args.input, args.output)
 
 
 if __name__ == "__main__":
