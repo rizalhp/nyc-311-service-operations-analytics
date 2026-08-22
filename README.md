@@ -15,9 +15,11 @@ This project analyzes public-service demand and operational performance to ident
 
 ## Dataset
 
-**NYC 311 Service Requests from 2010 to Present**  
+**NYC 311 Service Requests from 2020 to Present**  
 Provider: NYC Open Data / NYC311  
 Dataset ID: `erm2-nwe9`
+
+The official dataset is updated daily and contains tens of millions of public service-request records. Each row represents a 311 service request with attributes such as creation/closure timestamps, responding agency, problem/complaint category, status, and geographic location.
 
 The repository does not store the full source dataset because it is very large. Instead, `src/download_data.py` retrieves a reproducible date slice directly from the NYC Open Data API.
 
@@ -26,7 +28,7 @@ Default project scope: **calendar year 2025**.
 ## Tech Stack
 
 - **Python:** pandas, requests
-- **SQL:** SQLite-compatible analytical queries
+- **SQL:** SQLite
 - **Visualization:** Tableau / Power BI
 - **Version Control:** Git + GitHub
 
@@ -35,18 +37,40 @@ Default project scope: **calendar year 2025**.
 ```text
 nyc-311-service-operations-analytics/
 ├── data/
-│   ├── raw/
-│   └── processed/
+│   └── README.md
 ├── dashboard/
+│   └── README.md
 ├── notebooks/
+│   └── 01_eda.ipynb
 ├── sql/
 │   └── analysis_queries.sql
 ├── src/
 │   ├── download_data.py
-│   └── prepare_data.py
+│   ├── prepare_data.py
+│   └── build_database.py
 ├── .gitignore
 ├── requirements.txt
 └── README.md
+```
+
+## Data Pipeline
+
+```text
+NYC Open Data API
+      ↓
+src/download_data.py
+      ↓
+data/raw/nyc_311_2025.csv
+      ↓
+src/prepare_data.py
+      ↓
+data/processed/nyc_311_2025_clean.csv
+      ↓
+src/build_database.py
+      ↓
+data/processed/nyc_311_analytics.db
+      ↓
+SQL + EDA + Tableau / Power BI
 ```
 
 ## Core KPIs
@@ -82,18 +106,23 @@ pip install -r requirements.txt
 
 python src/download_data.py
 python src/prepare_data.py
+python src/build_database.py
+jupyter notebook notebooks/01_eda.ipynb
 ```
 
-The downloader retrieves 2025 service requests by default and saves them to `data/raw/nyc_311_2025.csv`.
+The downloader retrieves 2025 service requests by default and saves them locally to `data/raw/nyc_311_2025.csv`.
 
-## Planned Portfolio Deliverables
+## Current Deliverables
 
-- reproducible API-based data extraction,
-- cleaned analytical dataset,
-- SQL KPI and trend analysis,
-- exploratory data analysis notebook,
-- Tableau / Power BI operations dashboard,
-- executive summary with actionable recommendations.
+- [x] Reproducible API-based extraction
+- [x] Data-cleaning and feature-engineering pipeline
+- [x] SQLite analytics layer
+- [x] SQL KPI and operations-analysis queries
+- [x] Exploratory-analysis notebook starter
+- [x] Tableau / Power BI dashboard blueprint
+- [ ] Final EDA results and business insights
+- [ ] Final dashboard
+- [ ] Executive recommendations
 
 ## Data Ethics
 
